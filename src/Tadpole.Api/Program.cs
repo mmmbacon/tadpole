@@ -39,6 +39,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevClients", policy =>
+        policy.WithOrigins(
+                "https://localhost:7296",
+                "http://localhost:5067",
+                "https://localhost:7297",
+                "http://localhost:5068")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -55,6 +68,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("DevClients");
 app.UseAuthentication();
 app.UseAuthorization();
 

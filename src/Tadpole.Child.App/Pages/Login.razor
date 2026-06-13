@@ -1,0 +1,51 @@
+@page "/login"
+@layout EmptyLayout
+@using Tadpole.Client.Shared.Models
+
+<PageTitle>Sign in</PageTitle>
+
+<div class="login-shell">
+    <div class="card login-card shadow-sm">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-1">Hi there!</h1>
+            <p class="text-muted mb-4">Sign in with your username and PIN. Dev sign-in works while auth endpoints are being built.</p>
+
+            <EditForm Model="_form" OnValidSubmit="SignIn">
+                <div class="mb-3">
+                    <label class="form-label" for="username">Username</label>
+                    <InputText id="username" class="form-control form-control-lg" @bind-Value="_form.Username" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="pin">PIN</label>
+                    <InputText id="pin" type="password" class="form-control form-control-lg" @bind-Value="_form.Pin" maxlength="6" />
+                </div>
+                <button class="btn btn-primary btn-lg w-100" type="submit">Let's go!</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private AuthSession Session { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private LoginForm _form = new() { Username = "alex.t", Pin = "1234" };
+
+    private async Task SignIn()
+    {
+        var displayName = string.IsNullOrWhiteSpace(_form.Username) ? "Friend" : _form.Username.Split('.')[0];
+        await Session.SignInAsync(new AuthSessionInfo(
+            AccessToken: "dev-child-token",
+            Role: TadpoleRole.Child,
+            UserId: Guid.NewGuid(),
+            DisplayName: char.ToUpper(displayName[0]) + displayName[1..]));
+
+        Navigation.NavigateTo("/");
+    }
+
+    private sealed class LoginForm
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Pin { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,68 @@
+﻿@page "/"
+@attribute [Authorize]
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Guardian dashboard</h1>
+<p class="lead text-muted">Manage child accounts and approve friend connections.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h2 class="h5">Children</h2>
+                <p class="display-6 mb-0">@_children.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h2 class="h5">Pending approvals</h2>
+                <p class="display-6 mb-0">@_pendingConnections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h2 class="h5">API status</h2>
+                <p class="mb-0">
+                    @if (_apiHealthy is null)
+                    {
+                        <span class="text-muted">Checking…</span>
+                    }
+                    else if (_apiHealthy == true)
+                    {
+                        <span class="text-success">Connected</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Unavailable</span>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">Quick actions</h2>
+        <a class="btn btn-primary me-2" href="children">Add a child</a>
+        <a class="btn btn-outline-primary" href="connections">Review connections</a>
+    </div>
+</div>
+
+@code {
+    [Inject] private TadpoleApiClient Api { get; set; } = default!;
+
+    private readonly List<string> _children = ["Alex", "Jordan"];
+    private int _pendingConnections = 1;
+    private bool? _apiHealthy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _apiHealthy = await Api.CheckHealthAsync();
+    }
+}

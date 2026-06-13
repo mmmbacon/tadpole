@@ -1,0 +1,131 @@
+@page "/chat/{FriendId:guid}"
+@attribute [Authorize]
+@implements IAsyncDisposable
+
+<PageTitle>Chat</PageTitle>
+
+<div class="chat-header mb-3">
+    <a class="btn btn-link ps-0" href="friends">&larr; Friends</a>
+    <h1 class="h4 mb-0">@_friendName</h1>
+    <span class="badge @GetHubBadgeClass()">@_hubStatus</span>
+</div>
+
+<div class="chat-panel card">
+    <div class="card-body chat-messages">
+        @if (_messages.Count == 0)
+        {
+            <p class="text-muted mb-0">No messages yet. Say hi!</p>
+        }
+        else
+        {
+            @foreach (var message in _messages)
+            {
+                <div class="chat-bubble @(message.IsMine ? "mine" : "theirs")">
+                    <div>@message.Body</div>
+                    <small>@message.CreatedAt.ToLocalTime().ToString("t")</small>
+                </div>
+            }
+        }
+    </div>
+    <div class="card-footer chat-composer">
+        <EditForm Model="_composer" OnValidSubmit="SendMessage">
+            <div class="input-group">
+                <InputText class="form-control" @bind-Value="_composer.Body" placeholder="Type a message" />
+                <button class="btn btn-primary" type="submit" disabled="@(!CanSend)">Send</button>
+            </div>
+        </EditForm>
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <p class="text-danger small mt-2 mb-0">@_error</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid FriendId { get; set; }
+
+    [Inject] private MessageHubClient Hub { get; set; } = default!;
+    [Inject] private AuthSession Session { get; set; } = default!;
+
+    private readonly List<MessageSummary> _messages = [];
+    private ComposerModel _composer = new();
+    private string _friendName = "Friend";
+    private string _hubStatus = "Disconnected";
+    private string? _error;
+    private bool _connected;
+
+    private bool CanSend => _connected && !string.IsNullOrWhiteSpace(_composer.Body);
+
+    protected override void OnParametersSet()
+    {
+        _friendName = FriendId.ToString()[..8] switch
+        {
+            "aaaaaaaa" => "Sam",
+            "bbbbbbbb" => "Riley",
+            _ => "Friend"
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Hub.MessageReceived += OnMessageReceived;
+
+        if (Session.IsAuthenticated)
+        {
+            try
+            {
+                await Hub.ConnectAsync();
+                _connected = true;
+                _hubStatus = "Connected";
+            }
+            catch (Exception ex)
+            {
+                _hubStatus = "Offline";
+                _error = $"Could not connect to chat: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        _error = null;
+
+        try
+        {
+            var body = _composer.Body.Trim();
+            _messages.Add(new MessageSummary(
+                Guid.NewGuid(),
+                Guid.Empty,
+                Session.Current?.UserId ?? Guid.Empty,
+                body,
+                DateTimeOffset.UtcNow,
+                true));
+
+            await Hub.SendMessageAsync(FriendId, body);
+            _composer = new ComposerModel();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void OnMessageReceived(MessageSummary message)
+    {
+        _messages.Add(message with { IsMine = false });
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetHubBadgeClass() => _connected ? "text-bg-success" : "text-bg-secondary";
+
+    public async ValueTask DisposeAsync()
+    {
+        Hub.MessageReceived -= OnMessageReceived;
+        await Hub.DisposeAsync();
+    }
+
+    private sealed class ComposerModel
+    {
+        public string Body { get; set; } = string.Empty;
+    }
+}
