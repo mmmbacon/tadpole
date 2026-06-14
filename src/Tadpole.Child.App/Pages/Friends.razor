@@ -1,0 +1,32 @@
+@page "/friends"
+@attribute [Authorize]
+
+<PageTitle>Friends</PageTitle>
+
+<h1>Friends</h1>
+<p class="text-muted">Tap a friend to open your chat.</p>
+
+<div class="row g-3">
+    @foreach (var friend in _friends)
+    {
+        <div class="col-md-6 col-lg-4">
+            <a class="card friend-card text-decoration-none" href="@($"chat/{friend.Id}")">
+                <div class="card-body">
+                    <div class="friend-avatar">@friend.DisplayName[0]</div>
+                    <h2 class="h5 mb-1 text-dark">@friend.DisplayName</h2>
+                    <p class="text-muted small mb-0">Tap to chat</p>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly List<FriendCard> _friends =
+    [
+        new(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Sam"),
+        new(Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Riley")
+    ];
+
+    private sealed record FriendCard(Guid Id, string DisplayName);
+}

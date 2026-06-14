@@ -1,0 +1,82 @@
+@page "/children"
+@attribute [Authorize]
+
+<PageTitle>Children</PageTitle>
+
+<h1>Children</h1>
+<p class="text-muted">Create and manage supervised child accounts.</p>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Add child</h2>
+                <EditForm Model="_form" OnValidSubmit="AddChild">
+                    <div class="mb-3">
+                        <label class="form-label" for="displayName">Display name</label>
+                        <InputText id="displayName" class="form-control" @bind-Value="_form.DisplayName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <InputText id="username" class="form-control" @bind-Value="_form.Username" />
+                    </div>
+                    <button class="btn btn-primary" type="submit">Save (UI preview)</button>
+                </EditForm>
+                @if (!string.IsNullOrEmpty(_status))
+                {
+                    <p class="text-success mt-3 mb-0">@_status</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Registered children</h2>
+                @if (_children.Count == 0)
+                {
+                    <p class="text-muted mb-0">No children yet.</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var child in _children)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <strong>@child.DisplayName</strong>
+                                    <div class="text-muted small">@child.Username · code @child.FriendCode</div>
+                                </div>
+                                <span class="badge text-bg-success">Active</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly List<ChildSummary> _children =
+    [
+        new(Guid.NewGuid(), "Alex", "alex.t", "FROG42", true),
+        new(Guid.NewGuid(), "Jordan", "jordan.t", "LILY7K", true)
+    ];
+
+    private ChildForm _form = new();
+    private string? _status;
+
+    private Task AddChild()
+    {
+        _status = $"Saved {_form.DisplayName} locally. API endpoints coming soon.";
+        _form = new ChildForm();
+        return Task.CompletedTask;
+    }
+
+    private sealed class ChildForm
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+    }
+}

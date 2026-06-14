@@ -10,6 +10,9 @@ The initial scaffold follows the architecture document in `docs/`:
 - `src/Tadpole.Application` - Application service contracts and use-case boundaries.
 - `src/Tadpole.Domain` - Core domain entities and enums.
 - `src/Tadpole.Infrastructure` - EF Core persistence and infrastructure integrations.
+- `src/Tadpole.Client.Shared` - Shared Blazor client services (auth session, API client, SignalR).
+- `src/Tadpole.Guardian.App` - Blazor WebAssembly guardian portal.
+- `src/Tadpole.Child.App` - Blazor WebAssembly child messaging experience.
 - `tests/Tadpole.UnitTests` - Unit tests.
 
 The target stack is .NET 10, ASP.NET Core, SignalR, EF Core, PostgreSQL, Redis, and Blazor WebAssembly clients for Guardian and Child experiences.
@@ -45,6 +48,21 @@ dotnet test ./tests/Tadpole.UnitTests/Tadpole.UnitTests.csproj
 ```
 
 The API entry point is `src/Tadpole.Api/Program.cs`, with a health endpoint at `/health` and the initial SignalR message hub mapped to `/hub/msg`.
+
+Run the front-end apps (after starting the API):
+
+```bash
+dotnet run --project ./src/Tadpole.Guardian.App/Tadpole.Guardian.App.csproj
+dotnet run --project ./src/Tadpole.Child.App/Tadpole.Child.App.csproj
+```
+
+Local URLs:
+
+- Guardian portal: `https://localhost:7296`
+- Child app: `https://localhost:7297`
+- API / Swagger: `https://localhost:7001/swagger`
+
+Both clients use dev sign-in until authentication endpoints are implemented. Configure the API base URL in each app's `wwwroot/appsettings.json`.
 
 ## CI
 

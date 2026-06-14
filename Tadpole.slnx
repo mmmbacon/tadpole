@@ -2,7 +2,10 @@
   <Folder Name="/src/">
     <Project Path="src/Tadpole.Api/Tadpole.Api.csproj" />
     <Project Path="src/Tadpole.Application/Tadpole.Application.csproj" />
+    <Project Path="src/Tadpole.Child.App/Tadpole.Child.App.csproj" />
+    <Project Path="src/Tadpole.Client.Shared/Tadpole.Client.Shared.csproj" />
     <Project Path="src/Tadpole.Domain/Tadpole.Domain.csproj" />
+    <Project Path="src/Tadpole.Guardian.App/Tadpole.Guardian.App.csproj" />
     <Project Path="src/Tadpole.Infrastructure/Tadpole.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
