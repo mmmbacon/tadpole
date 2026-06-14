@@ -27,14 +27,14 @@ public sealed class MessageHubClient : IAsyncDisposable
         if (_connection is { State: HubConnectionState.Connected })
             return;
 
-        var token = _session.Current?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
+        if (string.IsNullOrWhiteSpace(_session.Current?.AccessToken))
             throw new InvalidOperationException("Sign in before connecting to the message hub.");
 
         _connection ??= new HubConnectionBuilder()
             .WithUrl($"{_options.ApiBaseUrl.TrimEnd('/')}/hub/msg", options =>
             {
-                options.AccessTokenProvider = () => Task.FromResult<string?>(token);
+                options.AccessTokenProvider = () =>
+                    Task.FromResult<string?>(_session.Current?.AccessToken);
             })
             .WithAutomaticReconnect()
             .Build();

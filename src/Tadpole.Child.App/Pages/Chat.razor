@@ -121,7 +121,7 @@
     public async ValueTask DisposeAsync()
     {
         Hub.MessageReceived -= OnMessageReceived;
-        await Hub.DisposeAsync();
+        await Hub.DisconnectAsync();
     }
 
     private sealed class ComposerModel

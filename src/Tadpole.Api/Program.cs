@@ -68,7 +68,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("DevClients");
+if (app.Environment.IsDevelopment())
+    app.UseCors("DevClients");
 app.UseAuthentication();
 app.UseAuthorization();
 

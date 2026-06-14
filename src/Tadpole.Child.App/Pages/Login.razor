@@ -33,7 +33,12 @@
 
     private async Task SignIn()
     {
-        var displayName = string.IsNullOrWhiteSpace(_form.Username) ? "Friend" : _form.Username.Split('.')[0];
+        var displayName = string.IsNullOrWhiteSpace(_form.Username)
+            ? "Friend"
+            : _form.Username.Split('.')[0];
+        if (string.IsNullOrWhiteSpace(displayName))
+            displayName = "Friend";
+
         await Session.SignInAsync(new AuthSessionInfo(
             AccessToken: "dev-child-token",
             Role: TadpoleRole.Child,
